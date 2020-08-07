@@ -1,0 +1,405 @@
+<html>
+<head>
+	<title>Shanghai Metro</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="d3.min.js"></script>
+	<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap-toggle.min.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-toggle.min.css">
+	<style type="text/css">
+/*		#clock {
+			font-family: sans-serif;
+			font-size: 1.5em;
+			font-weight: 300;
+			color: "grey";
+		}*/
+		.bar {
+  			fill: #9056a3;
+		}
+
+		.axis text {
+  			font: 12px sans-serif;
+		}
+
+		.axis path,
+		.axis line {
+		  	fill: none;
+		  	stroke: #000;
+		  	shape-rendering: crispEdges;
+		}
+
+		/*.x.axis path {
+		  	display: none;
+		}*/
+		.index-label {
+			font: 14px sans-serif;
+		}
+	</style>
+</head>
+<body>
+<div><h2 class="text-center">列车载客量动态图(以地铁5号线为例)</h2>
+</div>
+<p class="text-center">请点击"开始"启动动态演示   <input type="checkbox" checked data-toggle="toggle" id="play_passenger" data-on="<span class='glyphicon glyphicon-play' aria-hidden='true'></span> 开始" data-off="<span class='glyphicon glyphicon-pause' aria-hidden='true'></span> 暂停"></p>
+<div>
+	<svg id="passengers"></svg>
+</div>
+<script>
+	var stations = ["闵行开发区", "文井路", "华宁路", "金平路", "东川路", "剑川路", "北桥", "颛桥", "银都路", "春申路", "莘庄"];
+
+	var data;
+
+	var intervalId;
+
+	var START_MINUTES = 300;
+
+	var start_minutes = 410;
+
+	var ANIMATION_INTERVAL = 1000;
+
+	d3.json("trains.json", function(error, json){
+		if (error) return console.warn(error);
+		data = json;
+		console.log("load success!");
+		// update();
+  //   	var intervalId = setInterval(update, ANIMATION_INTERVAL);
+  		// startAnimation();
+  		// $("#play_passenger").on("click", function(e){
+  		// 	if ($("#play_passenger").checked == true){
+  		// 		startAnimation();
+  		// 	}
+  		// 	else{
+  		// 		stopAnimation();
+  		// 	}
+  		// });
+		$("#play_passenger").bootstrapToggle("enable");
+	});
+
+	function startAnimation(){
+		intervalId = setInterval(update, ANIMATION_INTERVAL);
+	}
+
+	$("#play_passenger").change(function(){
+		if ($(this).prop("checked") == true){
+			// console.log("stop animation called")
+			// console.log($(this).prop("checked"));
+			stopAnimation();
+			// clearInterval(intervalId);
+			// console.log(intervalId);
+		}
+		else{
+			// console.log("start animation called")
+			// console.log($(this).prop("checked"));
+			// console.log($(this).)
+			startAnimation();
+			// $(this).prop("checked") = true;
+			// console.log($(this).prop("checked"));
+		}
+	});
+
+	var margin = {top: 20, right: 30, bottom: 30, left: 50},
+	    width = 1000 - margin.left - margin.right,
+	    height = 400 - margin.top - margin.bottom;
+
+	var x = d3.scale.ordinal().domain(stations)
+	    .rangeRoundBands([0, width], .8);
+
+	var y = d3.scale.linear().domain([0, 1600])
+	    .range([height, 0]);
+
+
+	pi = Math.PI;
+	scaleMins = d3.scale.linear().domain([0, 59 + 59/60]).range([0, 2 * pi]);
+	scaleHours = d3.scale.linear().domain([0, 11 + 59/60]).range([0, 2 * pi]);
+
+	function format_minutes(min){
+		var hour = Math.floor(min / 60);
+		var minute = Math.round(min % 60);
+		if (hour<10) hour = '0' + hour;
+		if (minute<10) minute = '0' + minute;
+		return hour + ":" + minute;
+	}
+
+	var xAxis = d3.svg.axis()
+	    .scale(x)
+	    .orient("bottom");
+
+	var yAxis = d3.svg.axis()
+	    .scale(y)
+	    .orient("left");
+
+	var chart = d3.select("#passengers")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  	.append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	chart.append("g")
+      	.attr("class", "x axis")
+      	.attr("transform", "translate(0," + height + ")")
+      	.call(xAxis);
+
+    var greenArea = chart.append("g")
+    	.attr("transform", "translate(0, " + y(600) + ")");
+
+    greenArea.append("svg:line")
+    	.attr("x1", 0)
+    	.attr("y1", 0)
+    	.attr("x2", width)
+    	.attr("y2", 0)
+    	.style("stroke", "green")
+    	.style("stroke-width", 1)
+    	.style("stroke-dasharray", "5,5");
+
+    greenArea.append("text")
+    	.attr("class", "index-label")
+    	.attr("x", 20)
+    	.attr("y", -10)
+    	.style("fill", "green")
+    	.text("拥挤度指数: 50% 舒适");
+
+    var orangeArea = chart.append("g")
+    	.attr("transform", "translate(0, " + y(900) + ")");
+
+    orangeArea.append("svg:line")
+    	.attr("x1", 0)
+    	.attr("y1", 0)
+    	.attr("x2", width)
+    	.attr("y2", 0)
+    	.style("stroke", "orange")
+    	.style("stroke-width", 2)
+    	.style("stroke-dasharray", "5,5");
+
+    orangeArea.append("text")
+    	.attr("class", "index-label")
+    	.attr("x", 20)
+    	.attr("y", -10)
+    	.style("fill", "orange")
+    	.text("拥挤度指数: 75% 拥挤");
+
+    var redArea = chart.append("g")
+    	.attr("transform", "translate(0, " + y(1170) + ")");
+
+    redArea.append("svg:line")
+    	.attr("x1", 0)
+    	.attr("y1", 0)
+    	.attr("x2", width)
+    	.attr("y2", 0)
+    	.style("stroke-width", 2)
+    	.style("stroke", "red");
+
+    redArea.append("text")
+    	.attr("class", "index-label")
+    	.attr("x", 20)
+    	.attr("y", -10)
+    	.style("fill", "red")
+    	.text("拥挤度指数: 100% 极度拥挤");
+
+    chart.append("g")
+      	.attr("class", "y axis")
+      	.call(yAxis)
+      	.append("text")
+    	.attr("transform", "rotate(-90)")
+    	.attr("y", 6)
+    	.attr("dy", ".71em")
+    	.style("text-anchor", "end")
+    	.text("乘客/列车");
+
+    clockGroup = chart.append("g")
+						.attr("width", 200)
+						.attr("height", 200)
+						.attr("transform", "translate(" + width/2 + ", 25)");
+
+	clockGroup.append("svg:circle")
+  			.attr("r", 40).attr("fill", "none")
+  			.attr("class", "clock outercircle")
+  			.attr("stroke", "black")
+  			.attr("stroke-width", 1);
+
+	clockGroup.append("svg:circle")
+  			.attr("r", 3)
+  			.attr("fill", "black")
+  			.attr("class", "clock innercircle");
+
+  	clockGroup.selectAll('.hour-tick')
+			.data(d3.range(0, 12)).enter()
+			.append('line')
+			.attr('class', 'hour-tick')
+			.attr('x1', 0)
+			.attr('x2', 0)
+			.attr('y1', 39)
+			.attr('y2', 37)
+			.attr('transform',function(d){
+				return 'rotate(' + scaleHours(d)*180/pi + ')';
+			})
+			.attr("stroke", "black")
+			.attr("stroke-width", 1);
+
+	renderClock(minutes_2_object(start_minutes));
+
+	clockGroup.append("g")
+  			.attr("transform", "translate(0, " + 60 + ")")
+  			.append("text")
+  			.attr("class", "clock-reading")
+  			.attr("text-anchor", "middle")
+			.text(format_minutes(start_minutes));
+
+	function customized_x(d) {
+		return (1-d[2][1])*x(d[2][0][0]) + d[2][1]*x(d[2][0][1]);
+	}
+
+    function draw(oneTick){
+    	var bars = chart.selectAll(".bar");
+    	
+      	var barUpdate = bars.data(oneTick, function(d) { return d[1]; });
+
+      	barUpdate.transition()
+      		.duration(ANIMATION_INTERVAL)
+      		.attr("x", customized_x)
+      		.attr("y", function(d) { 
+      			// console.log(d);
+      			return y(d[3]); 
+      		})
+      		.attr("height", function(d) { return height - y(d[3]);} );
+
+    	barUpdate.enter().append("rect")
+	      	.attr("class", "bar")
+	      	.attr("x", customized_x)
+	      	.attr("y", function(d) { return y(0); })
+	      	.attr("width", x.rangeBand())
+	      	.attr("height", 0)
+	      	.transition()
+	      	.duration(ANIMATION_INTERVAL)
+	      	.attr("y", function(d) { return y(d[3]); })
+	      	.attr("height", function(d) { return height - y(d[3]); });
+
+      	barUpdate.exit().transition()
+      		.duration(ANIMATION_INTERVAL)
+      		.attr("height", 0);
+
+      	barUpdate.exit().remove();
+    }
+
+    function shiftMinutes(minutes){
+    	return minutes - START_MINUTES;
+    }
+
+   	function minutes_2_object(min){
+		var hour = min / 60;
+		var minute = Math.round(min % 60);
+		return [
+			{ "unit": "minutes", "numeric": minute },
+			{ "unit": "hours", "numeric": hour }
+		];
+	}
+
+    function renderClock(data){
+		var hourArc, minuteArc;
+
+  		// clockGroup.selectAll(".clockhand").remove();
+
+  		minuteArc = d3.svg.arc()
+    		.innerRadius(0)
+    		.outerRadius(35)
+    		.startAngle(function(d) {
+    			return scaleMins(d.numeric);
+  			})
+    		.endAngle(function(d) {
+    			return scaleMins(d.numeric);
+ 			});
+
+  		hourArc = d3.svg.arc()
+		    .innerRadius(0)
+		    .outerRadius(20)
+    		.startAngle(function(d) {
+    			return scaleHours(d.numeric % 12);
+  			})
+    		.endAngle(function(d) {
+    			return scaleHours(d.numeric % 12);
+  			});
+
+  		var clockUpdate = clockGroup.selectAll(".clockhand")
+    		.data(data, function(d) { return d["unit"]; });
+
+    	clockUpdate.enter()
+    		.append("svg:path")
+    		.attr("d", function(d) {
+	      		if (d.unit === "seconds") {
+	        		// return secondArc(d);
+	      		} else if (d.unit === "minutes") {
+			        return minuteArc(d);
+			    } else if (d.unit === "hours") {
+	        		return hourArc(d);
+		        }
+    		})
+    		.attr("class", "clockhand")
+    		.attr("stroke", "black")
+    		.attr("stroke-width", function(d) {
+	      		if (d.unit === "seconds") {
+	        		// return 2;
+	      		} else if (d.unit === "minutes") {
+	        		return 2;
+	      		} else if (d.unit === "hours") {
+	        		return 3;
+	      		}
+    		})
+    		.attr("fill", "none");
+
+    	clockUpdate.transition()
+    		.duration(ANIMATION_INTERVAL)
+    		.attr("d", function(d) {
+	      		if (d.unit === "seconds") {
+	        		// return secondArc(d);
+	      		} else if (d.unit === "minutes") {
+			        return minuteArc(d);
+			    } else if (d.unit === "hours") {
+	        		return hourArc(d);
+		        }
+    		});
+
+		clockGroup.select("text.clock-reading")
+			.transition()
+			.duration(ANIMATION_INTERVAL)
+			.text(format_minutes(start_minutes));
+
+	}
+
+    function update(){
+    	// console.log("update called");
+		var oneTick = data.slice(shiftMinutes(start_minutes), shiftMinutes(start_minutes)+1)[0];
+		// console.log(oneTick);
+		// if (oneTick) {
+		// 	// minutes++;
+		// 	draw(oneTick);
+		// 	// setTimeout(update, 500);
+		// }
+		// else {
+		// 	stopAnimation();
+		// }
+		// console.log(data);
+
+		if (start_minutes < 22*60) {
+			console.log(start_minutes);
+			renderClock(minutes_2_object(start_minutes));
+			// console.log(oneTick);
+			draw(oneTick);
+			start_minutes++;
+		}
+		else {
+			start_minutes = 480;
+			renderClock(minutes_2_object(start_minutes));
+			draw(data.slice(shiftMinutes(start_minutes), shiftMinutes(start_minutes)+1)[0]);
+			stopAnimation();
+			// enableInteraction();
+		}
+	}
+
+	// var intervalId = setInterval(update, 1500);
+
+	function stopAnimation(){
+		clearInterval(intervalId);
+		// draw([]);
+	}
+
+</script>
