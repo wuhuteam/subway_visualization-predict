@@ -17,24 +17,26 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="#2F3BA2">
     <meta name="Description" content="上海地铁线路图">
 
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
     <title>上海地铁</title>
 </head>
 <body>
+<div><h1 id="time">00:00</h1></div>
 <div id="root"></div>
 </body>
 
 <script type="text/javascript" src="ditie.js"></script>
+<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+
 
 <script>
+    var h = document.getElementById("time");
+    var time = new Date();
+    time.setHours(0);
+    time.setMinutes(0);
+    time.setSeconds(0);
+    // time.setDate(1);
+    // time.setMonth(4);
+    time.setFullYear(2015, 3, 1);
 
     createAllcirlce();
 
@@ -42,38 +44,42 @@
         item.parentNode.insertBefore(new_item, item.nextSibling);
     }
 
-    //
-    // var gs = document.getElementsByTagName('g');
-    // gs[2].id = "g2";
-    // d3.selectAll("text").style('position', 'absolute');
-    //
-    //
-    // var g2 = d3.selectAll("#g2");
-    // console.log(g2.select("#美兰湖").attr("stroke"));
-    // g2.append("circle").attr("class", "t").attr("cx", 953).attr("cy", 583).attr("r", 15).attr("statid", "721").attr("fill", "#F26F1F").style('opacity', 0.7);
-    //
-    // data = [5, 6, 7, 8, 9, 10, 11, 12, 25];
-    //
-    d3.select("body").attr("bgcolor", "#696969");
-    d3.select("svg").attr("fill", "white");
-
+    var j = 0;
     var intervalId = setInterval(runAnimation, 100);
 
     function stopAnim() {
         clearInterval(intervalId);
     }
 
-    data = [10, 12.5, 15, 17.5, 20, 22.5, 25];
+
+    var data;
 
     function runAnimation() {
-        console.log("sad");
-        d = data.shift();
-        if (d) {
-            d3.selectAll("circle.t").attr("r", d);
-        } else {
-            stopAnim();
+        d = data[j];
+        var min = time.getMinutes();
+        time.setMinutes(min + 5);
+        h.innerHTML = time.toLocaleString();
+        if (d !== undefined) {
+            for (i = 72; i < d.length; i++) {
+                d3.select("[sid=" + d[i][0] + "]").attr("r", 100 * d[i][1] / 1200.0 + 30).style("opacity", 0.7 * d[i][1] / 1000.0 + 0.3);
+            }
         }
+        j += 1;
+        if (j === data.length) stopAnim();
     }
+
+
+    $.ajax({
+        url: "0401.json",
+        type: "GET",
+        dataType: "json",
+        success: function (datas) {
+            data = datas;
+        },
+        error: function () {
+            console.log("获取数据失败");
+        }
+    });
 
 </script>
 </html>
