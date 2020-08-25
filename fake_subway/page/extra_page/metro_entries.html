@@ -16,11 +16,11 @@
 			color: gray;
 		}
 
-/*		body {
-		  background-color: #393939;
+		body {
+		  background-color: #ffffff;
 		  font-size: 12px;
 		  font-family: 'Raleway', sans-serif;
-		}*/
+		}
 
 /*		p {
 		  color: white;
@@ -300,16 +300,16 @@
 						.attr("height", 200)
 						.attr("transform", "translate(" + width/5 + ", 50)");
 
-		clockGroup.append("svg:circle")
-  			.attr("r", 40).attr("fill", "none")
-  			.attr("class", "clock outercircle")
-  			.attr("stroke", "black")
-  			.attr("stroke-width", 1);
-
-		clockGroup.append("svg:circle")
-  			.attr("r", 3)
-  			.attr("fill", "black")
-  			.attr("class", "clock innercircle");
+		// clockGroup.append("svg:circle")
+  		// 	.attr("r", 40).attr("fill", "none")
+  		// 	.attr("class", "clock outercircle")
+  		// 	.attr("stroke", "black")
+  		// 	.attr("stroke-width", 1);
+		//
+		// clockGroup.append("svg:circle")
+  		// 	.attr("r", 3)
+  		// 	.attr("fill", "black")
+  		// 	.attr("class", "clock innercircle");
 
   		clockGroup.selectAll('.hour-tick')
 			.data(d3.range(0, 12)).enter()

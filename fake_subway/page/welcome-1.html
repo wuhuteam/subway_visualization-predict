@@ -116,7 +116,7 @@
 
                     <div class="layui-col-md12">
                         <div class="layui-card">
-                            <div class="layui-card-header"><i class="fa fa-line-chart icon"></i>报表统计</div>
+                            <div class="layui-card-header"><i class="fa fa-line-chart icon"></i>进出站客流量</div>
                             <div class="layui-card-body">
                                 <div id="echarts-records" style="width: 100%;min-height:500px"></div>
                             </div>
@@ -176,7 +176,7 @@
                 trigger: 'axis'
             },
             legend: {
-                data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎']
+                data:['人民广场', '虹桥火车站', '南京东路', '徐家汇', '静安寺']
             },
             grid: {
                 left: '3%',
@@ -195,33 +195,37 @@
                 data: ['周一','周二','周三','周四','周五','周六','周日']
             },
             yAxis: {
-                type: 'value'
+                name: '单位:万/人次',
+                type: 'value',
+                title: {
+                    text: '单位:万/人次'
+                    }
             },
             series: [
                 {
-                    name:'邮件营销',
+                    name:'人民广场',
                     type:'line',
-                    data:[120, 132, 101, 134, 90, 230, 210]
+                    data:[23.8, 19.6, 19.1, 21.5, 22.4, 25.3, 24.8]
                 },
                 {
-                    name:'联盟广告',
+                    name:'虹桥火车站',
                     type:'line',
-                    data:[220, 182, 191, 234, 290, 330, 310]
+                    data:[22.5, 17.9, 18.2, 20.0, 21.8, 22.6, 24.5]
                 },
                 {
-                    name:'视频广告',
+                    name:'南京东路',
                     type:'line',
-                    data:[150, 232, 201, 154, 190, 330, 410]
+                    data:[20.4, 15.7, 14.8, 19.4, 19.7, 21.2, 22.1]
                 },
                 {
-                    name:'直接访问',
+                    name:'徐家汇',
                     type:'line',
-                    data:[320, 332, 301, 334, 390, 330, 320]
+                    data:[15.4, 13.4, 13.1, 16.7, 18.2, 19.1, 20.4]
                 },
                 {
-                    name:'搜索引擎',
+                    name:'静安寺',
                     type:'line',
-                    data:[820, 932, 901, 934, 1290, 1330, 1320]
+                    data:[15.1, 13.6, 12.7, 16.2, 18.4, 18.7, 21.2]
                 }
             ]
         };
