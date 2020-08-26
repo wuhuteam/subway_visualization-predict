@@ -61,7 +61,7 @@
         h.innerHTML = time.toLocaleString();
         if (d !== undefined) {
             for (i = 72; i < d.length; i++) {
-                d3.select("[sid=" + d[i][0] + "]").attr("r", 100 * d[i][1] / 1200.0 + 30).style("opacity", 0.7 * d[i][1] / 1000.0 + 0.3);
+                d3.select("[sid=" + d[i][0] + "]").attr("r", 100 * d[i][1] / 1200.0 + 30).style("opacity", 0.5 * d[i][1] / 2000.0 + 0.3);
             }
         }
         j += 1;
